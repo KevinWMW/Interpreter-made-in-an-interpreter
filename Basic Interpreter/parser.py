@@ -1,4 +1,5 @@
-from token import Token
+from lexer import Token
+from ast import Statement, Expression, BinExpr, NumericLiteral
 
 
 class Parser:
@@ -6,58 +7,65 @@ class Parser:
         self.token_list = token_list
         self.index = 0
         self.current_token = token_list[0]
+        self.EOF = False
 
-    def next_token(self):
+    def lookahead(self):
+        if self.index >= len(self.token_list) - 1:
+            self.EOF = True
+            self.index = 0
         self.index += 1
         self.current_token = self.token_list[self.index]
-        if self.index >= len(self.token_list):
-            self.index = 0
-            print("End of token list")
+
+    def eat(self):
+        first = self.current_token.pop(0)
+        return first
 
     # Use "Recursive Descent for Parsing"
-    def parse(self):
-        return
+    # Doing the expression lower on the tree gives it more of a precedence counter-intuitively.
+    # Make it a priority to do the expressions higher up on the tree first
+
+    # Order of Precedence as a tree:
+    # Logical Expression
+    # Comparison Expression
+    # Factor Expression
+    # Unary Expression
+    # Primary Expression
+
+    def parse_primary_expression(self) -> Expression:
+        token = self.current_token
+
+        if token.type is Token.NUMERIC_LITERAL:
+            return NumericLiteral(token.NUMERIC_LITERAL, token.value)
+        elif token.type is Token.LBRACKET:
+            self.eat()
+            value = self.parse_expression()
 
 
-class Number:
-    def __init__(self, value):
-        self.token = Token(Token.NUMBER, value)
-        self.value = value
+    def parse_statement(self) -> Statement:
+        return self.parse_expression()
 
-    def __str__(self):
-        return f"{self.token}: {self.value}"
+    def parse_expression(self) -> Expression:
+        return self.parse_additive_expression()
 
+    # def parse_additive_expression(self) -> Expression:
+    #     left = self.parse_multiplicative_expr();
+    #
+    #     if self.current_token.value in ("+", "-"):
+    #
+    #
+    #     return left
+    #
+    # def parse_multiplicative_expr(self) -> Expression:
+    #     left = self.parse_primary_expression()
+    #     right
+    #
+    # def parse(self):
+    #     return 0
 
-class UnaryOperation:
-    def __init__(self, operation, operand):
-        self.operand = operand
-        self.operation = operation
-
-
-class BinaryOperation:
-    FACTOR = "factor"
-    TERM = "term"
-    EXPR = "expression"
-
-    def __init__(self, operation, pre, ant):
-        self.operation = operation
-        self.pre = pre
-        self.ant = ant
-
-    def add(self):
-        return str(f"{self.pre} + {self.ant}")
-
-    def subtract(self):
-        return str(f"{self.pre} - {self.ant}")
-
-    def multiply(self):
-        return str(f"({self.pre} * {self.ant})")
-
-    def divide(self):
-        return str(f"({self.pre} / {self.ant})")
-
-    def __str__(self):
-        return f"{self.pre} {self.operation} {self.ant}"
+    # def produce_ast(self):
+    #     while not self.EOF:
+    #
+    # def parse_statement(self):
 
 
 class Error:
